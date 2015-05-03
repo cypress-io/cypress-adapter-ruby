@@ -1,0 +1,109 @@
+Cypress.action do |cy|
+  cy.define :user do |*args|
+    sldkfjaldkfja slkfjasdlkf jadlskfj as
+    dflkjsdfalkdjs
+
+  end
+
+  cy.define %s(factory-email) do |*args|
+    FactoryGirl.create(:email, args)
+  end
+
+  cy.define :eval do |code_string|
+    eval(code_string).to_json
+  end
+end
+
+
+Factory.define do
+  factory :user do
+  end
+end
+
+Cypress.action do |cy|
+  cy.namespace :Factory do |cy|
+    cy.define :user
+  end
+end
+
+Cypress.config do |c|
+  c.enable_dangerous_eval!
+  c.factory_girl!
+
+  c.execute_test do |cy|
+    ActiveRecord::Base.transaction do
+      cy.run
+      raise ActiveRecord::Rollback
+    end
+  end
+
+  c.before do |cy|
+    @global_transaction_stack << tr
+  end
+
+  c.after do |cy|
+    @global_transaction_stack.pop.blow_it_up
+  end
+
+  c.before_all_action do |cy|
+    cy.run
+  end
+end
+
+
+describe 'foo' do
+  before(:each) { @user = create(:user) }
+  it 'foo' do
+    expect(@user.id).to eq(1)
+  end
+
+  context 'bar' do
+    before(:all) { @baz = create(:baz) }
+    after(:all) { # destroy baz }
+    before(:each) { @post = create(:post) }
+    it 'bars' do
+      post2 = create(:post)
+      expect(@post.id).to eq(2)
+    end
+
+    context 'baz' do
+      before(:each) { @comment = create(:comment) }
+      it 'bazzes' do
+        expect(@comment.id).to eq(3)
+      end
+    end
+  end
+
+  it 'foo other' do
+    # ...
+  end
+end
+
+:start
+:before 'foo' #transaction 1
+  :before(each) # transaction 2
+    :createuser
+    # test runs
+  :after(each) # rollback 2
+
+  :before 'bar' #transaction 3
+    :createbaz
+
+    :before(each) # transaction 4
+      :createuser
+      :createpost
+      # test runs
+    :after(each) #rollback 4
+
+    :before 'baz' #transaction 5
+      :before(each) #transaction 6
+        :createuser
+        :createpost
+        :createcomment
+        # runs test
+      :after(each) #rollback 6
+    :after #rollback 5
+  :after #rollback 3
+:after #rollback 1
+:end
+
