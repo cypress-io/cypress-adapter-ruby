@@ -40,11 +40,17 @@ module Cypress
     end
 
     def hook(name, &b)
-      @hooks[:name] = Hook.new(name, b)
+      @hooks[name] = Hook.new(name, b)
     end
 
     def run(b)
       self.instance_exec(&b)
+    end
+
+    def execute_hook(name, args)
+      puts "executing hook #{name}"
+      hook = @hooks[name]
+      hook.invoke(args) if hook
     end
   end
 
@@ -56,8 +62,8 @@ module Cypress
       @block = block
     end
 
-    def invoke(*args)
-      @block.call(*args)
+    def invoke(args)
+      @block.call(args)
     end
   end
 end

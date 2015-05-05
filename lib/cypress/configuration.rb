@@ -16,6 +16,6 @@ module Cypress
       end
     end
 
-    add_setting :url, 'http://localhost:3000'
+    add_setting :url, 'http://localhost:2020/__socket.io'
   end
 end
