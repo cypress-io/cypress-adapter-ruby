@@ -1,11 +1,11 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'cypress/ruby/version'
+require 'cypress/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "cypress-ruby"
-  spec.version       = Cypress::Ruby::VERSION
+  spec.name          = "cypress"
+  spec.version       = Cypress::VERSION
   spec.authors       = ["Thomas Holmes"]
   spec.email         = ["thomas@holmes.io"]
 
