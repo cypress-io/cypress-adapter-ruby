@@ -75,9 +75,9 @@ module Cypress
     def run_user_hook(name, args)
       begin
         Cypress.world.execute_hook(name.to_sym, args) ||
-          { __error: "No handler registered for #{name}" }
+          { __error: "No handler registered for #{name}", __name: "NoRegisteredHook" }
       rescue => e
-        { __error: e.message, __stack: e.backtrace.join("\n") }
+        { __error: e.message, __stack: e.backtrace.join("\n"), __name: e.class.to_s }
       end
     end
   end
