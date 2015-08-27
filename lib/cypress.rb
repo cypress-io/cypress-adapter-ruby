@@ -1,4 +1,6 @@
 require 'cypress/agent'
+require 'cypress/dispatcher'
+require 'cypress/strategy'
 require 'cypress/logger'
 require 'cypress/configuration'
 
