@@ -21,6 +21,7 @@ module Cypress
         logs = Cypress.logger.with_logs do
           response = run_user_hook(msg, args)
         end
+
         response[:__logs] = logs
       end
 

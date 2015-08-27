@@ -1,21 +1,18 @@
+require 'logger'
+
 module Cypress
   class Logger < ::Logger
     REGEX = /\x1B\[([0-9]{1,3}((;[0-9]{1,3})*)?)?[m|K]/
     def initialize
       @stored = []
-      @formatter = self.formatter = proc do |s, d, p, m|
-        puts '*****FORMATTTTTIN******'
-        [
-          s,
-          d,
-          p,
-          m.gsub(REGEX, '')
-        ].join(', ')
-      end
     end
 
-    def add(severity, message=nil, progname=nil)
-      @stored << [ severity, message, progname ]
+    def format(message)
+      message.gsub(REGEX, '').strip
+    end
+
+    def add(severity, progname=nil, message=nil)
+      @stored << self.format(message)
     end
 
     def with_logs
@@ -27,11 +24,6 @@ module Cypress
       logs.tap {
         @stored = []
       }
-    end
-
-    def formatter=(new)
-      @old_formatter = @formatter
-      @formatter = new
     end
   end
 
