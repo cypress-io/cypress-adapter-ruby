@@ -18,29 +18,26 @@ module Cypress
         @strategy.in
       else
         puts "running user hook #{msg}"
-        response = run_user_hook(msg, args)
+        logs = Cypress.logger.with_logs do
+          response = run_user_hook(msg, args)
+        end
+        response[:__logs] = logs
       end
 
       response
     end
 
     def run_user_hook(name, args)
-      payload = {}
-      logs = Cypress.logger.with_logs do
-        payload = begin
-                    response = Cypress.world.execute_hook(name.to_sym, args)
-                    if response
-                      { response: response }
-                    else
-                      { __error: "No handler registered for #{name}", __name: "NoRegisteredHook" }
-                    end
-                  rescue => e
-                    { __error: e.message, __stack: e.backtrace.join("\n"), __name: e.class.to_s }
-                  end
+      begin
+        response = Cypress.world.execute_hook(name.to_sym, args)
+        if response
+          { response: response }
+        else
+          { __error: "No handler registered for #{name}", __name: "NoRegisteredHook" }
+        end
+      rescue => e
+        { __error: e.message, __stack: e.backtrace.join("\n"), __name: e.class.to_s }
       end
-
-      payload[:__logs] = logs
-      payload
     rescue => e
       puts "Failed to run user hook #{e}"
       puts "#{e.backtrace.join("\n")}"
@@ -48,4 +45,3 @@ module Cypress
     end
   end
 end
-
