@@ -1,4 +1,5 @@
 require 'cypress/agent'
+require 'cypress/logger'
 require 'cypress/configuration'
 
 module Cypress

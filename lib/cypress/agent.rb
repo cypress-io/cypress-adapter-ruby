@@ -38,6 +38,8 @@ module Cypress
 
         response = agent.dispatch(msg)
 
+        puts "LOGS: #{response[:logs]}"
+        puts response
         socket.emit('remote:response', id, response)
       end
 
@@ -73,12 +75,26 @@ module Cypress
     end
 
     def run_user_hook(name, args)
-      begin
-        Cypress.world.execute_hook(name.to_sym, args) ||
-          { __error: "No handler registered for #{name}", __name: "NoRegisteredHook" }
-      rescue => e
-        { __error: e.message, __stack: e.backtrace.join("\n"), __name: e.class.to_s }
+      payload = {}
+      logs = Cypress.logger.with_logs do
+        payload = begin
+                    response = Cypress.world.execute_hook(name.to_sym, args)
+                    if response
+                      { response: response }
+                    else
+                      { __error: "No handler registered for #{name}", __name: "NoRegisteredHook" }
+                    end
+                  rescue => e
+                    { __error: e.message, __stack: e.backtrace.join("\n"), __name: e.class.to_s }
+                  end
       end
+
+      payload[:__logs] = logs
+      payload
+    rescue => e
+      puts "Failed to run user hook #{e}"
+      puts "#{e.backtrace.join("\n")}"
+      raise
     end
   end
 end
